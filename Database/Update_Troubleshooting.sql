@@ -1,4 +1,4 @@
-/*
+﻿/*
     PCBuilderDB - upgrade the troubleshooting decision tree
     - Creates/updates only dbo.TroubleshootingNodes and dbo.TroubleshootingOptions.
     - Uses the schema requested for the application.
@@ -14,6 +14,8 @@ GO
 USE PCBuilderDB;
 GO
 
+/* Phase 1: normalize schema in its own batch. Keeping this separate from INSERTs is important:
+   SQL Server can otherwise compile INSERT statements against the old table definition. */
 BEGIN TRY
     BEGIN TRANSACTION;
 
@@ -75,6 +77,25 @@ BEGIN TRY
             CONSTRAINT UQ_TroubleshootingOptions_Node_Order UNIQUE (NodeID, SortOrder)
         );
     END;
+
+    COMMIT TRANSACTION;
+    PRINT N'Đã chuẩn hóa cấu trúc hai bảng chẩn đoán.';
+END TRY
+BEGIN CATCH
+    IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
+    THROW;
+END CATCH;
+GO
+
+/* Phase 2: seed the tree only if the table is empty. This is a new batch so
+   the INSERT statements bind to the columns created/validated in Phase 1. */
+USE PCBuilderDB;
+GO
+SET NOCOUNT ON;
+SET XACT_ABORT ON;
+
+BEGIN TRY
+    BEGIN TRANSACTION;
 
     IF NOT EXISTS (SELECT 1 FROM dbo.TroubleshootingNodes)
     BEGIN
