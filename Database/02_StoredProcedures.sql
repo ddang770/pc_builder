@@ -23,7 +23,7 @@ AS
 BEGIN
  SET NOCOUNT ON;
  SELECT c.ComponentID,c.CategoryID,cat.CategoryCode,cat.CategoryName,b.BrandID,b.BrandName,c.ModelName,c.SKU,c.Price,c.StockQuantity,c.IsActive,
-        cpu.Socket AS Socket, COALESCE(cpu.MemoryType, mb.MemoryType, ram.MemoryType) AS MemoryType,
+        COALESCE(cpu.Socket, mb.Socket) AS Socket, COALESCE(cpu.MemoryType, mb.MemoryType, ram.MemoryType) AS MemoryType,
         cpu.TDP_W, gpu.PowerDraw_W, psu.Wattage_W, gpu.LengthMM, cs.MaxGPULengthMM, cs.MaxCoolerHeightMM,
         mb.FormFactor AS FormFactor,
         cpuScore.Score AS CpuBenchmarkScore, gpuScore.Score AS GpuBenchmarkScore
